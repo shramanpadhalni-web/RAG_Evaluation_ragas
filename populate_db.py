@@ -4,6 +4,7 @@ import chromadb
 import pandas as pd
 from typing import List
 from langchain.text_splitter import RecursiveCharacterTextSplitter, SentenceTransformersTokenTextSplitter
+import openai
 
 
 DATA_PATH = 'data/medical_tc_train.csv'
@@ -166,6 +167,20 @@ def setup_text_retrieval(tokens_chunks, encoder_function):
 
     print(f"Initialized Collection: {text_collection.name}")
 
+def get_openai_embedding(text, model="text-embedding-ada-002"):
+    """
+    Generates an embedding for the given text using the specified OpenAI model.
+
+    Parameters:
+    - text (str): The text for which to generate an embedding.
+    - model (str): The OpenAI model to use for generating the embedding.
+
+    Returns:
+    - list: The embedding vector for the input text.
+    """
+    response = openai.embeddings.create(input=text, model=model)
+    embedding = response.data[0].embedding
+    return embedding
 
 def execute_pipeline():
     """
@@ -192,11 +207,16 @@ def execute_pipeline():
         # Tokenize and chunk the text from the specified data path
         text_segments = tokenize_and_chunk_text_from_csv(DATA_PATH, "medical_abstract")
         
-        # Initialize the embedding function with Sentence Transformers
-        embedding_func = SentenceTransformerEmbeddingFunction()
-        
+        # Process text segments and generate embeddings using the OpenAI model
+
+        # if you want to use openai embeddings
+        # embeddings = [get_openai_embedding(text_segment, "text-embedding-3-small") for text_segment in text_segments]
+
+        #Just to make things quick we are using sentence transformer embeddings
+        embeddings = SentenceTransformerEmbeddingFunction()
+
         # Setup the retrieval model with the processed text and embeddings
-        setup_text_retrieval(text_segments, embedding_func)
+        setup_text_retrieval(text_segments, embeddings)
         
         print("Text retrieval system initialization finished.")
     except Exception as e:
