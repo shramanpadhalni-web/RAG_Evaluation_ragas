@@ -1,7 +1,7 @@
 import os
 import dspy
-
-from db_retriever_module import PassageRetriever
+from dotenv import load_dotenv
+from db_retriever_module import ChromadbRetrieverModule
 
 EXIT_PROMPT = "exit"
 
@@ -56,6 +56,8 @@ def setup():
         RAG: An instance of the RAG model ready for generating answers.
     """
     try:
+        load_dotenv()
+
         # Load API key securely
         openai_api_key = os.getenv("OPENAI_API_KEY")
         if not openai_api_key:
@@ -63,11 +65,12 @@ def setup():
         
         # Configuration for dspy models
         turbo = dspy.OpenAI(model='gpt-3.5-turbo')
-        chroma_rm = PassageRetriever(
-            collection_name="test",
-            persist_directory="chroma.db",
-            local_embed_model="sentence-transformers/paraphrase-MiniLM-L6-v2",
-            openai_api_key=openai_api_key
+        chroma_rm = ChromadbRetrieverModule(
+            db_collection_name="medical_abstract_data_collection",  # The name of the ChromaDB collection
+            persist_directory="local_chroma.db",  # Directory path for ChromaDB persistence
+            local_embed_model="sentence-transformers/paraphrase-MiniLM-L6-v2",  # The local embedding model
+            api_key=openai_api_key,  # OpenAI API key (if using that, i am just sentence transformer embedding)
+            result_limit=7  # Default number of passages to retrieve per query, adjust as needed
         )
 
         dspy.settings.configure(lm=turbo, rm=chroma_rm)

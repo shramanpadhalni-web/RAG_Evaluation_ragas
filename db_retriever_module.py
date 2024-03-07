@@ -34,159 +34,166 @@ if chromadb is None:
         "To resolve this, install the required library using the command: pip install dspy-ai[chromadb]"
     )
 
-class PassageRetriever(dspy.Retrieve):
+class ChromadbRetrieverModule(dspy.Retrieve):
     """
-    Implements a passage retrieval mechanism leveraging the chromadb database for returning top-ranked passages based on a query.
+    A retrieval module that uses chromadb to return the top passages for a given query.
 
-    This class assumes an existing chromadb index filled with passages and their metadata.
+    Assumes that the chromadb index has been created and populated with the following metadata:
+        - documents: The text of the passage
 
-    Parameters:
-        db_name (str): The name of the chromadb collection.
-        storage_path (str): Directory path for chromadb persistence.
-        embedding_model (str, optional): Identifier for the OpenAI embedding model. Defaults to "text-embedding-ada-002".
-        api_key (str, optional): OpenAI API key. Defaults to None.
-        organization (str, optional): Specifies the OpenAI organization. Defaults to None.
-        result_limit (int, optional): Number of passages to retrieve per query. Defaults to 7.
+    Args:
+        collection_name (str): chromadb collection name
+        persist_directory (str): chromadb persist directory
+        embed_model (str, optional): The OpenAI embedding model to use. Defaults to "text-embedding-ada-002".
+        api_key (str, optional): The API key for OpenAI. Defaults to None.
+        openai_org (str, optional): The organization for OpenAI. Defaults to None.
+        k (int, optional): The number of top passages to retrieve. Defaults to 3.
 
     Returns:
-        dspy.Prediction: Object containing the matched passages.
-
-    Usage Example:
-        Initialize the retriever and configure it as the default:
-        ```python
-        llm = dspy.OpenAI(model="gpt-3.5-turbo")
-        retriever = PassageRetriever('my_collection', 'path_to_db')
-        dspy.settings.configure(lm=llm, rm=retriever)
-        # Query the retriever
-        retriever.query("search term")
-        ```
-
-        Integrate within the forward method of a dspy module:
-        ```python
-        self.retriever = PassageRetriever('my_collection', 'path_to_db', result_limit=5)
-        ```
+        dspy.Prediction: An object containing the retrieved passages.
     """
 
     def __init__(
         self,
-        db_name: str,
-        storage_path: str,
-        embedding_model: str = "text-embedding-ada-002",
+        db_collection_name: str,
+        persist_directory: str,
+        embed_model: str = "text-embedding-ada-002",
+        api_provider: Optional[str] = None,
         api_key: Optional[str] = None,
-        api_base_url: Optional[str] = None,
+        api_type: Optional[str] = None,
+        api_base: Optional[str] = None,
         api_version: Optional[str] = None,
-        local_model_path: Optional[str] = None,
+        local_embed_model: Optional[str] = None,
         result_limit: int = 7,
     ):
-        self.embedding_model = embedding_model
-        self._setup_chromadb(db_name, storage_path)
+        self.embed_model = embed_model
 
-        self.embedding_function = embedding_functions.OpenAIEmbedFunction(
+        self._init_chromadb(db_collection_name, persist_directory)
+
+        self.ef = embedding_functions.OpenAIEmbeddingFunction(
             api_key=api_key,
-            base_url=api_base_url,
-            version=api_version,
-            model=embedding_model,
+            api_base=api_base,
+            api_type=api_type,
+            api_version=api_version,
+            model_name=embed_model,
         )
 
-        self.is_local_model = False
-        if local_model_path is not None:
-            self._local_model = AutoModel.from_pretrained(local_model_path)
-            self._local_tokenizer = AutoTokenizer.from_pretrained(local_model_path)
-            self.is_local_model = True
-            self.device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
-        
-        super().__init__(result_limit=result_limit)
+        if local_embed_model is not None:
+            self._local_embed_model = AutoModel.from_pretrained(local_embed_model)
+            self._local_tokenizer = AutoTokenizer.from_pretrained(local_embed_model)
+            self.use_local_model = True
+            self.device = torch.device(
+                # 'cuda:0' if torch.cuda.is_available() else
+                'mps' if torch.backends.mps.is_available()
+                else 'cpu'
+            )
+        else:
+            self.use_local_model = False
 
-    def _setup_chromadb(self, db_name: str, storage_path: str) -> None:
-        """Initializes and loads the chromadb index.
+        super().__init__(k=result_limit)
 
-        Parameters:
-            db_name (str): Name of the chromadb collection.
-            storage_path (str): Path to the chromadb storage directory.
-        """
-        self.chromadb_client = chromadb.Client(Settings(storage_path=storage_path, persistent=True))
-        self.db_collection = self.chromadb_client.get_collection(name=db_name)
-        
-        print(f"Loaded Collection Size: {self.db_collection.count_documents()}")
-        if not self.chromadb_client.list_collections():
-            raise ValueError(f"The collection '{db_name}' is missing. Please initialize it in chromadb.")
-    
-    @backoff.on_exception(backoff.expo,(openai.RateLimitError),max_time=15, jitter=None)
+    def _init_chromadb(
+        self,
+        collection_name: str,
+        persist_directory: str,
+    ) -> chromadb.Collection:
+        """Initialize chromadb and return the loaded index.
 
-    def _generate_query_embeddings(self, search_terms: List[str]) -> List[List[float]]:
-            """Generates embeddings for the input search terms.
+        Args:
+            collection_name (str): chromadb collection name
+            persist_directory (str): chromadb persist directory
 
-            Parameters:
-                search_terms (List[str]): List of search terms.
-
-            Returns:
-                List[List[float]]: List of embeddings for the input search terms.
-            """
-            
-            if not self.is_local_model:
-                # Utilize the OpenAI API to generate embeddings for the provided search terms.
-                embeddings_response = openai.Embedding.create(
-                    input=search_terms, model=self.embedding_model)
-                return [emb.vector for emb in embeddings_response.data]
-
-            # Switch to using the local embedding model when available.
-            tokenized_inputs = self._local_tokenizer(search_terms, padding=True, truncation=True, return_tensors="pt").to(self.device)
-            with torch.no_grad():
-                outputs = self._local_model(**tokenized_inputs.to(self.device))
-
-            pooled_embeddings = self.aggregate_embeddings(outputs, tokenized_inputs['attention_mask'])
-            final_embeddings = torch.nn.functional.normalize(pooled_embeddings, p=2, dim=1)
-            return final_embeddings.cpu().numpy().tolist()
-
-    def aggregate_embeddings(self, model_output, attention_masks):
-        """
-        Applies mean pooling on the output of a transformer model to get sentence-level embeddings.
-
-        Parameters:
-            model_output: The output from the transformer model, typically containing token embeddings.
-            attention_masks: A tensor indicating which tokens are padding and which are not.
 
         Returns:
-            Torch tensor representing aggregated sentence embeddings.
         """
-        token_embeddings = model_output[0]  # Assuming the first output contains token embeddings
-        expanded_attention_masks = attention_masks.unsqueeze(-1).expand(token_embeddings.size()).float()
-        sum_embeddings = torch.sum(token_embeddings * expanded_attention_masks, 1)
-        mean_embeddings = sum_embeddings / torch.clamp(expanded_attention_masks.sum(1), min=1e-9)
-        return mean_embeddings
+
+        self._chromadb_client = chromadb.Client(
+            Settings(
+                persist_directory=persist_directory,
+                is_persistent=True,
+            )
+        )
+        self._chromadb_collection = self._chromadb_client.get_collection(
+            name=collection_name)
+        
+        print(f"Collection Count: {self._chromadb_collection.count()}")
+        if self._chromadb_client.list_collections() == []:
+            raise ValueError(
+                f"Collection {collection_name} does not exist. Please create it using chromadb."
+            )
+
+    @backoff.on_exception(
+        backoff.expo,
+        (openai.RateLimitError),
+        max_time=15,
+    )
+    def _get_embeddings(self, queries: List[str]) -> List[List[float]]:
+        """Return query vector after creating embedding using OpenAI
+
+        Args:
+            queries (list): List of query strings to embed.
+
+        Returns:
+            List[List[float]]: List of embeddings corresponding to each query.
+        """
+
+        # if not self.use_local_model:
+        #     # Using OpenAI's embedding model
+        #     embedding = openai.Embedding.create(
+        #         input=queries, model=self._openai_embed_model
+        #     )
+        #     return [embedding.embedding for embedding in embedding.data]
+
+
+        if not self.use_local_model:
+            response = openai.embeddings.create(
+                input=queries,
+                model=self.embed_model).data[0].embedding
+            
+            # return [embedding['embedding'] for embedding in response['data']]
+            # embeddings = [item['embedding'] for item in response.data]
+            return response
+
+        # Use local model for embeddings
+        encoded_input = self._local_tokenizer(queries, padding=True,
+                                               truncation=True, 
+                                               return_tensors="pt").to(self.device)
+        with torch.no_grad():
+            model_output = self._local_embed_model(**encoded_input.to(self.device))
+
+        embeddings = self._mean_pooling(model_output, encoded_input['attention_mask'])
+        normalized_embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
+        return normalized_embeddings.cpu().numpy().tolist()
+    
+    def _mean_pooling(self, model_output, attention_mask):
+        token_embeddings = model_output[0] # First element of model_output contains all token embeddings
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
     def forward(
-            self, query_or_queries: Union[str, List[str]], k: Optional[int] = None
-            ) -> dspy.Prediction:
-        """
-        Executes a search operation in the database using provided queries and returns top-ranked passages.
+        self, query_or_queries: Union[str, List[str]], k: Optional[int] = None
+    ) -> dspy.Prediction:
+        """Search with db for self.k top passages for query
 
-        This method accepts either a single query string or a list of query strings. It then generates embeddings for these queries, performs a search in the chromadb collection based on these embeddings, and retrieves the top `k` passages that match the query or queries.
-
-        Parameters:
-            query_or_queries (Union[str, List[str]]): A single query string or a list of query strings for which to retrieve matching passages.
-            k (Optional[int]): The number of top passages to retrieve for each query. If not specified, defaults to the class attribute `k`.
+        Args:
+            query_or_queries (Union[str, List[str]]): The query or queries to search for.
 
         Returns:
-            dspy.Prediction: An object encapsulating the retrieved passages. Each passage is represented as a dictionary with key 'long_text', containing the passage text.
-
-        Note:
-            The method filters out any empty query strings before processing. It relies on the `_get_embeddings` method to convert query strings into embeddings and uses these embeddings to query the chromadb collection.
+            dspy.Prediction: An object containing the retrieved passages.
         """
-        # Ensure input is in list format and filter out empty strings
-        queries = [query_or_queries] if isinstance(query_or_queries, str) else query_or_queries
-        queries = [q.strip() for q in queries if q.strip()]  # Enhanced filtering to remove only whitespace queries
+        queries = (
+            [query_or_queries]
+            if isinstance(query_or_queries, str)
+            else query_or_queries
+        )
+        queries = [q for q in queries if q]  # Filter empty queries
+        embeddings = self._get_embeddings(queries)
 
-        # Generate embeddings for the non-empty queries
-        embeddings = self._generate_query_embeddings(queries)
-
-        # Determine the number of results to retrieve
         k = self.k if k is None else k
+        results = self._chromadb_collection.query(
+            query_embeddings=embeddings, n_results=k
+        )
 
-        # Execute the search in the database
-        search_results = self._chromadb_collection.query(
-            query_embeddings=embeddings, n_results=k)
+        passages = [dotdict({"long_text": x}) for x in results["documents"][0]]
 
-        # Extract and format passages from the search results
-        passages = [dotdict({"long_text": doc}) for doc in search_results["documents"][0]]
         return passages
