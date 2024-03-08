@@ -2,6 +2,8 @@ import os
 import dspy
 from dotenv import load_dotenv
 from db_retriever_module import ChromadbRetrieverModule
+from dspy.teleprompt import BootstrapFewShot
+import streamlit as st
 
 EXIT_PROMPT = "exit"
 
@@ -11,15 +13,15 @@ class GenerateAnswer(dspy.Signature):
     Attributes:
         context (dspy.InputField): May contain relevant facts for generating the answer.
         question (dspy.InputField): The question to be answered.
-        answer (dspy.OutputField): Outputs the answer to the question, aiming for 1-5 words.
+        answer (dspy.OutputField): Outputs the answer to the question, aiming for 1-100 words.
     """
 
     context = dspy.InputField(desc="may contain relevant facts")
     question = dspy.InputField()
-    answer = dspy.OutputField(desc="Answer the question in 1-5 words")
+    answer = dspy.OutputField(desc="Answer the question in 1-100 words")
 
 
-class RAG(dspy.Module):
+class MedicalAbstractRag(dspy.Module):
     """Retrieval-Augmented Generation for answering questions using a retrieval model and generative LLM.
 
     Attributes:
@@ -58,6 +60,9 @@ def setup():
     try:
         load_dotenv()
 
+        # NOTE: This example uses the local_embedding_model for ChromaDBRetrieverModule, If you want to
+        # use open ai embeddings please go ahead
+
         # Load API key securely
         openai_api_key = os.getenv("OPENAI_API_KEY")
         if not openai_api_key:
@@ -74,32 +79,63 @@ def setup():
         )
 
         dspy.settings.configure(lm=turbo, rm=chroma_rm)
-        return RAG()
+        return MedicalAbstractRag()
     except Exception as e:
         print(f"Failed to set up the models: {e}")
         # Exiting or returning a specific value could be considered here
         raise
 
-if __name__ == "__main__":
-    try:
-        rag = setup()
+# OK Lets setup the model
+model = setup()
 
-        while True:
-            print(f"\n\nEnter the prompt or type '{EXIT_PROMPT}' to exit:\n")
-            prompt = input().strip()
+# Set up a basic teleprompter, which will compile our RAG program.
+teleprompter = BootstrapFewShot(metric=dspy.evaluate.answer_exact_match)
 
-            if prompt.lower() == EXIT_PROMPT:
-                print("Exiting...")
-                break
+# Lets prepare some training set
+trainset = [
+    dspy.Example(question="What are the main categories of diseases discussed in the medical abstracts?", 
+                 answer="The main categories include neoplasms, digestive system diseases, nervous system diseases, cardiovascular diseases, and general pathological conditions.").with_inputs('question'),
             
-            if not prompt:
-                print("Empty input. Please enter a valid question.")
-                continue
+    dspy.Example(question="Which disease category is most frequently addressed in the abstracts?", 
+                 answer="Neoplasms are the most frequently addressed disease category in the abstracts.").with_inputs('question'),
+    
+    dspy.Example(question="What methodologies are commonly used in the studies described in the medical abstracts?", 
+                answer="Common methodologies include clinical trials, observational studies, meta-analyses, and case reports.").with_inputs('question'),
+    
+    dspy.Example(question="How is the effectiveness of a new treatment evaluated in the medical abstracts?", 
+                answer="The effectiveness of a new treatment is often evaluated through randomized controlled trials, comparing outcomes with a control group receiving standard treatment or placebo.").with_inputs('question'),
+    
+    dspy.Example(question="Can you describe the role of genetics in the development of neoplasms as discussed in the abstracts?", 
+                answer="Genetics plays a crucial role in the development of neoplasms, with many abstracts discussing genetic mutations, hereditary risk factors, and the molecular mechanisms driving oncogenesis.").with_inputs('question'),
+    
+    dspy.Example(question="What advancements in cardiovascular disease treatment are highlighted in the abstracts?", 
+                answer="Advancements in cardiovascular disease treatment highlighted in the abstracts include new pharmacological therapies, minimally invasive surgical techniques, and improvements in diagnostic imaging.").with_inputs('question'),
+    
+    dspy.Example(question="How do the abstracts address the impact of lifestyle factors on digestive system diseases?", 
+                answer="The abstracts address the impact of lifestyle factors such as diet, alcohol consumption, smoking, and physical activity on the incidence and progression of digestive system diseases.").with_inputs('question'),
+    
+    dspy.Example(question="What are the emerging trends in the management of nervous system diseases according to the abstracts?", 
+                answer="Emerging trends in the management of nervous system diseases include the use of precision medicine, advancements in neuroimaging techniques, and novel therapeutic approaches like gene therapy.").with_inputs('question'),
+    
+    dspy.Example(question="What challenges in diagnosing general pathological conditions are discussed?", 
+                answer="Challenges in diagnosing general pathological conditions discussed include the variability of symptoms, the need for advanced diagnostic tools, and the importance of differential diagnosis.").with_inputs('question'),
+    
+    dspy.Example(question="How is patient quality of life addressed in the context of chronic diseases in the abstracts?", 
+                answer="Patient quality of life in the context of chronic diseases is addressed through discussions on pain management, mental health support, lifestyle modifications, and palliative care.").with_inputs('question'),]
+#
+# Compile!
+compiled_rag = teleprompter.compile(model, trainset=trainset)
 
-            try:
-                response = rag(prompt)
-                print(f"\nAnswer: {response.answer}")
-            except Exception as e:
-                print(f"Error processing your question: {e}")
-    except KeyboardInterrupt:
-        print("\nProcess interrupted. Exiting...")
+st.title('Medical Abstract RAG Question Answering System')
+
+# Streamlit UI components for input and interaction
+user_prompt = st.text_input("Enter your question here:")
+
+if st.button('Submit'):
+    if user_prompt:  # Check if the input is not empty
+        # Generate and display the response for the given prompt
+        response = compiled_rag(user_prompt)
+        st.write(f"Answer: {response.answer}")
+    else:
+        st.write("Please enter a question to get an answer.")
+

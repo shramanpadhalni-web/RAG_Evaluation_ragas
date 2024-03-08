@@ -125,7 +125,7 @@ class ChromadbRetrieverModule(dspy.Retrieve):
     @backoff.on_exception(
         backoff.expo,
         (openai.RateLimitError),
-        max_time=15,
+        max_time=60,
     )
     def _get_embeddings(self, queries: List[str]) -> List[List[float]]:
         """Return query vector after creating embedding using OpenAI
