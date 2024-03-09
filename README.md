@@ -4,9 +4,11 @@ This project introduces a Question and Answer RAG (Retrieval Augmented Generatio
 
 ## Setup
 1. Clone the Repository:
-git clone [repository URL]
+   ```git clone [repository URL]
+   ```
+   
 
-2. Create and Activate virtual environment:
+3. Create and Activate virtual environment:
 python -m venv venv
 
 source venv/bin/activate
