@@ -29,3 +29,4 @@ This project uses the ChromaDB for the vector embeddings. The script populate_db
 
 python populate_db.py
 ```
+The above step will construct the database and store it within the local_chroma.db folder. It leverages the dataset found in the data/medical_tc_train.csv to create the embeddings automatically.
