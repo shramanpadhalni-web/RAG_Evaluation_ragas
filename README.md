@@ -89,4 +89,12 @@ What all metrics are considered:
 * Answer Semantic Similarity
 * Correctness of Answers
 
+## What all is Checked as far as model performance is concerned:
+
+### 1. Assessment of Direct Recall Without External Reference
+### 2. Evaluating System Accuracy on Synthetic Data with Known Context
+### 3. Hyper-parameter Search
+### 4. Evaluating Passage Relevance Through Composite Query Comparison
+### 5. Query Expansion
+
 
