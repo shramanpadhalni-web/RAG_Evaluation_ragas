@@ -77,3 +77,16 @@ The following picture depicts the workflow how we can create the LLM Application
 * **DSPy**: Carves out its niche by focusing on optimizing prompt construction for better interaction with LLMs. The challenge of crafting effective prompts is crucial, as the quality of prompts directly impacts the performance of language models. DSPy addresses this challenge with a programmable approach that offers significant advantages in terms of precision and adaptability. By providing tools and frameworks that streamline the process of prompt engineering, DSPy enables developers to fine-tune their interactions with LLMs, leading to more accurate and relevant responses. This precision and adaptability make DSPy a valuable tool for developers looking to maximize the effectiveness of their LLM-based applications.
 
 Each of these frameworks—LangChain, LlamaIndex, and DSPy—contributes to expanding the potential of LLMs in unique ways, from application building and enhanced search capabilities to optimized prompt engineering. DSPy's emphasis on programmable prompt construction, in particular, offers a distinct advantage for developers seeking to improve their LLM interactions through more precise and adaptable prompts, highlighting the importance of targeted tools in the evolving landscape of AI and machine learning. Though I feel that DSPy is currently in a very early stage, From the LangChain perspective we need to look towards HyDE.
+
+## Generating Synthetic Questions and Answers:
+## [RAGAS](https://github.com/explodinggradients/ragas) for Validation of LLM performance
+What all metrics are considered:
+* Faithfulness
+* Relevance of Answers by RAG
+* Context Precision
+* Context Relevancy
+* Context Recall
+* Answer Semantic Similarity
+* Correctness of Answers
+
+
