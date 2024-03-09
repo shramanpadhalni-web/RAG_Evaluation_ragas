@@ -17,4 +17,8 @@ This project introduces a Question and Answer RAG (Retrieval Augmented Generatio
    ```
 
 3. Install the requirements:
-pip install -r requirements.txt
+
+   ```
+   pip install -r requirements.txt
+   ```
+
