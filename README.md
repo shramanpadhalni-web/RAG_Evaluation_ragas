@@ -35,3 +35,9 @@ The **execute_pipeline()** function does the following steps to setup the Retrie
 1. Tokenize and chunk text: Break down the raw text into smaller, manageable pieces for processing.
 2. Initialize embedding function: Sets up a mechanism for converting text chunks into vector representations.
 3. Setup text retrieval: Incorporates the text chunks and their embeddings into the retrieval database (ChromsDB).
+
+To give the chatbot like experience the QA system is being integrated with the streamlit library, hence run the command:
+```python
+
+streamlit run main.py
+```
