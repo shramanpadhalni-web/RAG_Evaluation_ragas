@@ -21,4 +21,11 @@ This project introduces a Question and Answer RAG (Retrieval Augmented Generatio
    ```
    pip install -r requirements.txt
    ```
+## Usage/Examples
 
+This project uses the ChromaDB for the vector embeddings. The script populate_db.py populates the ChromaDB with embeddings from a [medical abstract dataset](https://github.com/sebischair/Medical-Abstracts-TC-Corpus), enabling advanced text retrieval capabilities. Follow the steps below to use it in your project:
+
+```python
+
+python populate_db.py
+```
