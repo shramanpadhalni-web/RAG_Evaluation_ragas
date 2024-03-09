@@ -49,6 +49,8 @@ This system leverages the dspy framework, Streamlit, and a retrieval-augmented g
 The system begins by importing essential Python libraries and modules:
 * os and dotenv for managing environment variables.
 * DSPy framework which signifies a transformative advancement in the interaction between developers and Large Language Models (LLMs), fundamentally altering the landscape of prompt engineering. Traditional approaches necessitated manual crafting of prompts, a method that was not only labor-intensive but also lacked precision. DSPY streamlines this process, offering developers an innovative toolkit that enhances efficiency and accuracy in prompt engineering. This shift empowers developers to focus more on creating impactful applications with LLMs, rather than getting bogged down in the minutiae of prompt construction.
+The following picture depicts the workflow how we can create the LLM Application based on DSPy framework.
+![GitHub Logo](https://github.com/shramanpadhalni-web/RAG_Evaluation_ragas/blob/main/DSpy_workflow.PNG "DSPy workflow to create LLM Apps")
 
 * ChromadbRetrieverModule for the retrieval model.
 * streamlit for the web app interface.
