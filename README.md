@@ -10,12 +10,11 @@ This project introduces a Question and Answer RAG (Retrieval Augmented Generatio
    
 
 3. Create and Activate virtual environment:
-   ---
+
+   ```
    python -m venv venv
-   ---
-   ---
    source venv/bin/activate
-   ---
+   ```
 
 3. Install the requirements:
 pip install -r requirements.txt
