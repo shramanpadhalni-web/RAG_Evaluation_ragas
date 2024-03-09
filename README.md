@@ -4,7 +4,8 @@ This project introduces a Question and Answer RAG (Retrieval Augmented Generatio
 
 ## Setup
 1. Clone the Repository:
-   ```git clone [repository URL]
+   ```
+   git clone [repository URL]
    ```
    
 
