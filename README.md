@@ -32,7 +32,6 @@ python populate_db.py
 The above step will construct the database and store it within the **local_chroma.db folder**. It leverages the dataset found in the **data/medical_tc_train.csv** to create the embeddings automatically. The collection created in the chroma DB is named as : **medical_abstract_data_collection**, Please make sure while retrieving the collection you use the name correctly. In order to run the things very fast this project uses the **SentenceTransformerEmbeddingFunction**, which by default is "**all-MiniLM-L6-v2**" embeddings. The "**all-MiniLM-L6-v2**" model is a smaller, distilled version of larger language models, designed to maintain high performance while being more efficient for deployment. Specifically, it has 6 layers, which contributes to its compactness and efficiency. There is **get_openai_embedding** in the script above which you can use to explore the open ai embeddings.
 
 The **execute_pipeline()** function does the following steps to setup the Retrieval system:
-Steps:
-    1. Tokenize and chunk text: Break down the raw text into smaller, manageable pieces for processing.
-    2. Initialize embedding function: Sets up a mechanism for converting text chunks into vector representations.
-    3. Setup text retrieval: Incorporates the text chunks and their embeddings into the retrieval database (ChromsDB).
+1. Tokenize and chunk text: Break down the raw text into smaller, manageable pieces for processing.
+2. Initialize embedding function: Sets up a mechanism for converting text chunks into vector representations.
+3. Setup text retrieval: Incorporates the text chunks and their embeddings into the retrieval database (ChromsDB).
