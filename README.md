@@ -52,4 +52,17 @@ The system begins by importing essential Python libraries and modules:
 * ChromadbRetrieverModule for the retrieval model.
 * streamlit for the web app interface.
 ### Step 2: Define Signature and Module Classes
-
+* **GenerateAnswer**: A DSPy signature class for generating answers to questions given a context.
+* **MedicalAbstractRag**: A DSPy module class that employs retrieval-augmented generation (RAG) for answering questions. It retrieves relevant passages and then generates an answer.
+### Step 3: Setup and Configuration
+* The setup() function configures the environment by loading API keys and setting up DSPy and retrieval models. It initializes the MedicalAbstractRag model with specified parameters.
+### Step 4: Initialize the Model
+* The system initializes the RAG model using the setup() function. This model will be used to process the questions and generate answers.
+### Step 5: Training Data Preparation
+* A set of example questions and answers related to medical abstracts are compiled into a training set. This data will be used to fine-tune the question-answering capabilities of the model. And this is what I like about DSPy framework to build RAG modules, this really makes the step from Prompt Engineering to Prompt Programming, as Data/Concept drift will happen hence you are not guaranteed to get the consistent answers over the period of time.
+### Step 6: Compile the RAG Program
+* The BootstrapFewShot class from dspy is used to compile the RAG program with the prepared training set. This step optimizes the model's ability to answer questions accurately.
+### Step 7: Integrate with Streamlit for Web Interface
+* Streamlit is used to create a simple web interface where users can input their questions related to medical abstracts. The interface includes an input field for the question and a submit button.
+### Step 8: Generate and Display Answers
+* Upon clicking the submit button, the system processes the input question through the compiled RAG model to generate an answer. The answer is then displayed on the web interface.
