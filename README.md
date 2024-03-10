@@ -203,6 +203,12 @@ Primary objective: To verify the model's capability to extract an accurate respo
 
 ### 3. Hyper-parameter Search
 ### 4. Evaluating Passage Relevance Through Composite Query Comparison
+Steps:
+* Initially, create augmented versions of all queries in the test dataset.
+* Next, identify the most similar passages for each query.
+* Keep a tally of the most frequently retrieved passages.
+* Subsequently, determine the most common passages for each query and utilize these as the query's context.
+*  the context to identify the answer most closely matching the query.
 ### 5. Query Expansion
 
 
