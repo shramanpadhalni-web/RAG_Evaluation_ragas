@@ -208,7 +208,9 @@ Steps:
 * Next, identify the most similar passages for each query.
 * Keep a tally of the most frequently retrieved passages.
 * Subsequently, determine the most common passages for each query and utilize these as the query's context.
-*  the context to identify the answer most closely matching the query.
+* The context to identify the answer most closely matches the query.
 ### 5. Query Expansion
+* Question + Hypothetical Answer -> Retrieved Context
+* Context + Question -> Answer
 
 
