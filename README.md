@@ -81,6 +81,24 @@ Each of these frameworks—LangChain, LlamaIndex, and DSPy—contributes to expa
 ## Reports
 Have used [Weights and Biases Platform](https://wandb.ai) in order to track experiments in RAG LLM, iterate on Test, Synthetic etc. datasets, evaluate model performance, You can find out the integration with wandb in couple of jupiter notebooks.
 ## Generating Synthetic Questions and Answers:
+Drawing inspiration from HotpotQA, I crafted the subsequent prompt to elicit questions and answers for the dataset.
+```
+Below is the context for generating questions and answers.
+
+---------------------
+{context}
+ ---------------------
+
+Given the context above without using external information,
+develop {questions_per_section} question(s) with their brief answer(s),
+suitable for a quiz or examination. Keep answers concise, within 1-10 words. 
+Ensure the generated content varies and aligns closely with the provided context."
+    
+"""
+
+```
+
+Using the following prompt:
 ## [RAGAS](https://github.com/explodinggradients/ragas) for Validation of LLM performance
 What all metrics are considered:
 * Faithfulness
