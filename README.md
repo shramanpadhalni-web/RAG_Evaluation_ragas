@@ -198,7 +198,9 @@ answer_correctness : 0.45
 
 ### 2. LLMs performance against the synthetically generated data with ground truth as context
 Primary objective: To verify the model's capability to extract an accurate response from the factual context, assess for any hallucination, and evaluate the response's accuracy.
+
 ![GitHub Logo](https://github.com/shramanpadhalni-web/RAG_Evaluation_ragas/blob/main/synthetic.PNG "Performance against synthetic data")
+
 ### 3. Hyper-parameter Search
 ### 4. Evaluating Passage Relevance Through Composite Query Comparison
 ### 5. Query Expansion
