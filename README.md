@@ -98,40 +98,63 @@ Ensure the generated content varies and aligns closely with the provided context
 """
 
 ```
-## Synthetic Questions and Answers:
----
+## Synthetic Questions and Answers (Generated):
+```
 * What was the effect of oropharyngeal anesthesia on obstructive sleep apnea in the study subjects?
 * Oropharyngeal anesthesia led to an increase in obstructive apneas and hypopneas, as well as a higher frequency of oxyhemoglobin desaturations during sleep.
----
-  
+```
+```
 * What was the prognostic value of low neutrophil function for late pyogenic infections in bone marrow transplant recipients?
 * Low neutrophil function, particularly defective skin window migration and combined defects, predisposed patients to late pyogenic infections after bone marrow transplantation.
-
-  
+```
+```
 * What was the treatment that resulted in both clinical and electrophysiological improvement in a patient with paraneoplastic vasculitic neuropathy?
 * ""
-
+```
+```
 * What was the conclusion regarding the role of CNS radioprophylaxis in the therapeutic management of childhood rhabdomyosarcoma with meningeal extension?
 * The conclusion was that CNS prophylaxis with radiotherapy is questionable in the management of childhood RMSA with meningeal extension."
-
-  
+```
+```
 * What are the advantages of using duplex Doppler ultrasound in examining abdominal vasculature?
 * The advantages include absence of toxicity, providing both physiologic and anatomic information, and avoiding the risks associated with contrast angiography.
-
-  
+```
+```
 * Why is congenital hypertrophy of the retinal pigment epithelium important in identifying patients with familial adenomatous polyposis (FAP)?
+```
+```
 * What is the main conclusion drawn from the study on intraluminal Ca++ regulatory site defect in sarcoplasmic reticulum from malignant hyperthermia pig muscle?
+```
+```
 * What is the purpose of the back isometric dynamometer (BID-2000) developed for elderly patients with osteopenia or osteoporosis?
+```
+```
 * What was the effect of prophylactic peroral acyclovir (ACV) on the development of ultraviolet radiation-induced herpes labialis lesions?
+```
+```
 * What unique myopathic changes were observed in the hypertrophied muscle of patients with hereditary internal anal sphincter myopathy?
+```
+```
 * What was found regarding the immune response of peripheral blood mononuclear cells to HBxAg in patients with hepatitis B virus infection?
+```
+```
 * What is the role of neural cell adhesion molecule (N-CAM) in neuroendocrine tissues?
+```
+```
 * What role do genetics play in the development of cerebrovascular disease like stroke?
+```
+```
 * What was the predominant type of IgA found in gut lavage fluid in the study?
+```
+```
 * What are some alternative dosage regimens for rt-PA in patients with myocardial infarction?
+```
+```
 * What was the cholestanol content of the cataractous lens nucleus from a patient with cerebrotendinous xanthomatosis (CTX)?
+```
+```
 * What was the overall risk of developing secondary leukaemia in patients treated for Hodgkin's disease in the British National Lymphoma Investigation studies?
----
+```
 ## [RAGAS](https://github.com/explodinggradients/ragas) for Validation of LLM performance
 What all metrics are considered:
 * Faithfulness
