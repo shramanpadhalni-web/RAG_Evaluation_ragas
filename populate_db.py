@@ -3,7 +3,6 @@ from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunct
 import chromadb
 import pandas as pd
 from typing import List
-from langchain.text_splitter import RecursiveCharacterTextSplitter, SentenceTransformersTokenTextSplitter
 import openai
 
 

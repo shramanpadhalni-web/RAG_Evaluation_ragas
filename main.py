@@ -5,7 +5,6 @@ from db_retriever_module import ChromadbRetrieverModule
 from dspy.teleprompt import BootstrapFewShot
 import streamlit as st
 
-EXIT_PROMPT = "exit"
 
 class GenerateAnswer(dspy.Signature):
     """Generates answers to questions given the context.
