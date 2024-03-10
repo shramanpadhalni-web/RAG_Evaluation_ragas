@@ -21,6 +21,7 @@ This project introduces a Question and Answer RAG (Retrieval Augmented Generatio
    ```
    pip install -r requirements.txt
    ```
+4. Make sure you have the .env file in the root and have defined the openai key as OPENAI_API_KEY = "YOUR-OPENAI_KEY"
 ## Usage/Examples
 
 This project uses the ChromaDB for the vector embeddings. The script populate_db.py populates the ChromaDB with embeddings from a [medical abstract dataset](https://github.com/sebischair/Medical-Abstracts-TC-Corpus), enabling advanced text retrieval capabilities. Follow the steps below to use it in your project:
