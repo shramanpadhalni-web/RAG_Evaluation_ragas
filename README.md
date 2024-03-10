@@ -177,9 +177,25 @@ What all metrics are considered:
 * Answer Semantic Similarity
 * Correctness of Answers
 
-## What all is Checked as far as model performance is concerned:
+## What all is Checked to validate the model performance:
 
-### 1. Assessment of Direct Recall Without External Reference
+### 1. Check for Memorization without Retrieval
+```
+class FactoidResponse(dspy.Signature):
+    """Generates concise, fact-based responses to queries."""
+
+    question = dspy.InputField()
+    answer  = dspy.OutputField(desc="typically ranging from 1 to 5 words")
+
+# Define the predictor.
+generate_answer = dspy.Predict(FactoidResponse)
+```
+The primary objective of this experiment is to determine whether the model has memorized the data. For each question-answer duo, we will evaluate the similarity and accuracy of the response in comparison to the actual facts. It's important to mention that this experiment does not involve any retrieval process.
+```
+answer_similarity : 0.85
+answer_correctness : 0.45
+```
+
 ### 2. Evaluating System Accuracy on Synthetic Data with Known Context
 ### 3. Hyper-parameter Search
 ### 4. Evaluating Passage Relevance Through Composite Query Comparison
